@@ -1,3 +1,13 @@
+---
+title: JDBC工具类&示例
+date: 2024-05-21 18:10:12
+tags:
+  - Utils
+categories:
+  - JDBC
+author: Camellia.xiaohua
+---
+
 # JDBC工具类&示例
 
 ## 一、JDBC工具类
@@ -99,7 +109,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * 示例类，演示如何使用JDBC进行模糊查询。
+ * 示例类，演示如何使用JDBC进行---《模糊查询》。
  * <p>
  * 该类包含一个主方法，通过模糊查询从数据库中检索用户名。
  * </p>
@@ -147,6 +157,6 @@ public class FuzzyQueries {
 ```
 
 >在使用封装工具类一定不要忘记：
-> 1. 开启事务
-> 2. 提交事务
-> 3. 回滚事务
+> 1. 开启事务： `xxx.setAutoCommit(false); `
+> 2. 提交事务：`xxx.commit();`
+> 3. 回滚事务：` e.printStackTrace(); `

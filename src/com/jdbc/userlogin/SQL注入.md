@@ -1,4 +1,14 @@
+---
+title: SQL注入
+date: 2024-05-20 17:07:12
+tags:
+categories:
+- JDBC
+---
+
+
 # SQL注入
+
 SQL注入是一种网络攻击，利用应用程序未正确处理用户输入数据的漏洞，通过在输入字段插入恶意的SQL代码来执行数据库操作。
 这种攻击可能导致数据泄露、数据篡改或者完全控制数据库。
 
@@ -105,14 +115,15 @@ public class UserLogin {
 
 ## 二、解决SQL注入问题
 * 只要用户提供的信息不参与SQL语句的编译过程，问题就解决了。
-即使用户提供的信息中含有SQL语句的关键字，但是没有参与编译，不起作用。
-而为了让用户信息不参与编译，可以使用java.sql.PreparedStatement。    
-* PreparedStatement接口继承了java.sql.Statement。    
-* PreparedStatement是属于预编译的数据库操作对象。     
-* PreparedStatement的原理：预先对SQL语句的框架进行编译，然后再给SQL语句传**值**。     
+  即使用户提供的信息中含有SQL语句的关键字，但是没有参与编译，不起作用。
+  而为了让用户信息不参与编译，可以使用``java.sql.PreparedStatement`。
+* `PreparedStatement`接口继承了``java.sql.Statement`。
+* `PreparedStatement`是属于预编译的数据库操作对象。
+* `PreparedStatement`的原理：预先对SQL语句的框架进行编译，然后再给SQL语句传**值**。
 
-# 2.1 PreparedStatement实现
->使用PreparedStatement的代码步骤顺序有所不同。
+### 2.1 `PreparedStatement实现
+
+>使用`PreparedStatement`的代码步骤顺序有所不同。
 1. 注册驱动
 ```java
  Class.forName(driver);
@@ -121,8 +132,9 @@ public class UserLogin {
 ```java
 conn= DriverManager.getConnection(url, username, password);
 ```
-3. 获取预编译的数据库操作对象
+3. ==获取预编译的数据库操作对象==
 ```java
+//先将SQL语句框架搭好，传给prepareStatement进行预编译。
 String sql="select * from t_user where username = ? and password = ?";
 //程序执行到此处，会发送SQL语句框架给DBMS，然后DBMS进行sql语句的预编译。
 pstmt=conn.prepareStatement(sql);
@@ -130,9 +142,9 @@ pstmt=conn.prepareStatement(sql);
 pstmt.setString(1,username);  //这样即使有关键字也不参与编译。
 pstmt.setString(2,password);
 ```
->sql语句的位置有所调动，需在prepareStatement创建之前。
->SQL语句框架中。?表示一个占位符，一个占位符将来接受一个值。
-> 注意：占位符不能用单引号括起来。
+>1. SQL语句的位置有所调动，需在`prepareStatement`创建之前。
+>2. SQL语句框架中，?表示一个占位符。一个占位符将来接受一个值，即使有关键字也作为普通字符处理。
+> 3. 注意：占位符不能用单引号括起来。
 
 4. 执行SQL
 ```java
@@ -153,7 +165,8 @@ if(pstmt!=null)try {pstmt.close();} catch (SQLException e) {e.printStackTrace();
 if(conn!=null)try {conn.close();} catch (SQLException e) {e.printStackTrace();}
 ```
 
-### 示例代码
+### 2.2 示例代码
+
 ```java
 package com.jdbc.userlogin;
 
@@ -246,10 +259,12 @@ public class SQLInjectionSolution {
 ### 3.1 效率方面
 
 1. **`PreparedStatement`预编译和缓存：**
-    - `PreparedStatement` 预编译SQL语句，并将其缓存起来。在需要多次执行相同的SQL语句时，数据库可以重复使用预编译的查询计划，而无需重新编译。这节省了编译时间，提高了性能。   
+   - `PreparedStatement` 预编译SQL语句，并将其缓存起来。**在需要多次执行相同的SQL语句时**，数据库可以重复使用预编译的查询计划，而无需重新编译。这节省了编译时间，提高了性能。
 
 2. **`Statement` 每次执行都要编译：**
-    - 每次执行 `Statement` 时，SQL语句都会被重新解析、编译和优化，这会增加数据库的开销，尤其是当相同的SQL语句被多次执行时。
+   - 每次执行 `Statement` 时，SQL语句都会被重新解析、编译和优化，这会增加数据库的开销，尤其是当相同的SQL语句被多次执行时。
+
+> 所以SQL语句只执行一次，它两效率差不多。
 
 
 ### 3.2 类型安全检测
@@ -297,13 +312,15 @@ stmt.executeUpdate(sql);
 - 缺乏类型检查，容易导致SQL注入问题，也容易因为字符串拼接错误导致语法错误。
 
 >总结：
-> 1. PreparedStatement没有sql注入问题。   
-> 2. PreparedStatement有预编译和缓存，效率更高。   
-> 3. PreparedStatement支持类型安全检测。   
+> 1. `PreparedStatement`没有sql注入问题。
+> 2. `PreparedStatemen`t有预编译和缓存，效率更高。
+> 3. `PreparedStatement`支持类型安全检测。
 
-## 3.3 何时用Statement？
-虽然Statement有很多缺点，会导致SQL注入。但是有的程序功能必须使用Statement，需要进行sql语句的拼接，利用SQL注入传入sql关键字。
-例如、商城的按价格排序。    
+### 3.3 何时用Statement？
+
+虽然Statement有很多缺点，会导致SQL注入。但是有的程序功能必须使用Statement，需要进行SQL语句的拼接，利用SQL注入传入SQL关键字。
+例如、商城的按价格排序。
+
 ```java
 package com.jdbc.sort;
 
@@ -312,43 +329,43 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 
 public class JDBCSort {
-    public static void main(String[] args) {
-        //用户在控制台输入desc就是升序、输入asc就是降序。
-        Scanner sc = new Scanner(System.in);
-        System.out.println("请输入desc或者asc:");
-        String keyWords = sc.nextLine();
+   public static void main(String[] args) {
+      //用户在控制台输入desc就是升序、输入asc就是降序。
+      Scanner sc = new Scanner(System.in);
+      System.out.println("请输入desc或者asc:");
+      String keyWords = sc.nextLine();
 
-        //执行sql
-        ResourceBundle rb = ResourceBundle.getBundle("jdbc");
-        String driver = rb.getString("driver");
-        String url = rb.getString("url");
-        String username = rb.getString("username");
-        String password = rb.getString("password");
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            Class.forName(driver);
-            conn= DriverManager.getConnection(url,username,password);
-            stmt = conn.createStatement();
-            String sql="select id from user order by id "+keyWords;
-            rs=stmt.executeQuery(sql);
-            while(rs.next()){
-                System.out.println("id:"+rs.getInt(1));
-            }
+      //执行sql
+      ResourceBundle rb = ResourceBundle.getBundle("jdbc");
+      String driver = rb.getString("driver");
+      String url = rb.getString("url");
+      String username = rb.getString("username");
+      String password = rb.getString("password");
+      Connection conn = null;
+      Statement stmt = null;
+      ResultSet rs = null;
+      try {
+         Class.forName(driver);
+         conn= DriverManager.getConnection(url,username,password);
+         stmt = conn.createStatement();
+         String sql="select id from user order by id "+keyWords;
+         rs=stmt.executeQuery(sql);
+         while(rs.next()){
+            System.out.println("id:"+rs.getInt(1)); //输出获取的第一列
+         }
 
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }catch (SQLException e){
-            throw new RuntimeException(e);
-        }
-            finally {
-            if(rs!=null)try {rs.close();} catch (SQLException e) {e.printStackTrace();}
-            if(stmt!=null)try {stmt.close();} catch (SQLException e) {e.printStackTrace();}
-            if(conn!=null)try {conn.close();} catch (SQLException e) {e.printStackTrace();}
-        }
+      } catch (ClassNotFoundException e) {
+         throw new RuntimeException(e);
+      }catch (SQLException e){
+         throw new RuntimeException(e);
+      }
+      finally {
+         if(rs!=null)try {rs.close();} catch (SQLException e) {e.printStackTrace();}
+         if(stmt!=null)try {stmt.close();} catch (SQLException e) {e.printStackTrace();}
+         if(conn!=null)try {conn.close();} catch (SQLException e) {e.printStackTrace();}
+      }
 
-    }
+   }
 }
 
 ```

@@ -1,14 +1,10 @@
 ---
-title: JDBC介绍&编程六部
+title: JDBC介绍&编程六步
 date: 2024-05-17 00:36:12
 tags:
-- JDBC
 categories:
-- JDBC
+   - JDBC
 ---
-
-!!! note 目录
-<!-- toc -->
 
 
 # JDBC
@@ -16,21 +12,30 @@ categories:
 ## 一、JDBC介绍
 1.  JDBC是Java语言连接数据库（Java DataBase Connectivity）
 2. JDBC的本质是什么？
-    * JDBC是SUN公司制定的一套接口（interface）
-    * 接口都有调用者和实现者
-    * 面向接口调用、面向接口写实现类，这都属于面向接口编程。
+   * JDBC是SUN公司制定的一套接口（interface）
+   * 接口都有调用者和实现者
+   * 面向接口调用、面向接口写实现类，这都属于面向接口编程。
 >为什么SUN制定一套JDBC接口呢？
 >因为每个数据库的底层实现原理都不一样。
 
-![](https://camelliaxiaohua-1313958787.cos.ap-shanghai.myqcloud.com/asserts_JavaSE/202405171637239.png)
+![](https://github.com/camelliaxiaohua/JDBC/blob/master/img/JDBC%E4%BB%8B%E7%BB%8D%E5%92%8C%E7%BC%96%E7%A8%8B%E5%85%AD%E6%AD%A5.png)
 3. JDBC开发前的准备工作，先从官网下载对应的驱动jar包，然后将其配置到环境变量classpath当中。
-4. JDBC编程六部(important！！！)
-    * 注册数据库（作用：告诉Java程序，即将要连接的是哪个品牌的数据库）
-    * 获取连接（表示JVM的进程和数据库进程之间的通道打开了，属于进程之间的通信，重量级、使用完一定要关闭。）
-    * 获取数据库操作对象（专门执行Sql语句的对象）
-    * 执行SQL语句（DQL DML...）
-    * 处理查询结果集（只有第四步执行的是select语句的时候，才会有第五步处理查询结果集。）
-    * 释放资源（使用完资源之后一定要关闭资源。Java和数据库属于进程通信，开启之后一定要关闭。）
+
+4. ==**JDBC编程六步**==
+
+   > [!IMPORTANT]
+   >
+   > 1. 注册数据库（作用：告诉Java程序，即将要连接的是哪个品牌的数据库）
+   > 2. 获取连接（表示JVM的进程和数据库进程之间的通道打开了，属于进程之间的通信，重量级、使用完一定要关闭。）
+   > 3. 获取数据库操作对象（专门执行Sql语句的对象）
+   > 4. 执行SQL语句（DQL DML...）
+   > 5. 处理查询结果集（只有第四步执行的是select语句的时候，才会有第五步处理查询结果集。）
+   > 6. 释放资源（使用完资源之后一定要关闭资源。Java和数据库属于进程通信，开启之后一定要关闭。）
+>
+
+
+
+
 
 ## 二、JDBC快速入门
 1. 注册驱动
@@ -122,7 +127,7 @@ public class JDBCTest {
             //1、注册驱动
             Class.forName("com.mysql.cj.jdbc.Driver");
             //DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
-            //2.获取连接
+            //2.获取数据库连接
             String url = "jdbc:mysql://127.0.0.1:3306/testjdbc?useSSL=false";
             String username = "root";
             String password = "24211";
@@ -256,14 +261,12 @@ public class JDBCTest {
             //5、处理查询结果集
             while (resultSet.next()) { //光标指向行有数据
                 //取数据
-                //getString()方法特点：不管数据库中的数据是什么类型，都是以                       String形式取出。当然你也可以按数据类型取出。
-                //JDBC中所有下标从1开始，不是从0开始。
+                /*getString()方法特点：不管数据库中的数据是什么类型，都是以String形式取出。当然你也可以按数                   据类型取出。JDBC中所有下标从1开始，不是从0开始。*/
                 int id = resultSet.getInt("id");     
                 //注意：这个填的是查询语句的列名称，如果起别名则要使用别名。
                 String name = resultSet.getString("username");
                 double money = resultSet.getDouble("money");
                 System.out.println("id: " + id + "\tname: " + name + "\tmoney: " + money);
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -290,6 +293,11 @@ public class JDBCTest {
     }
 }
 ```
->注意：这个填的是查询语句的列名称，如果起别名则要使用别名。
 
+
+> [!NOTE]
+> 1. 这个填的是查询语句的列名称，如果起别名则要使用别名。
+> 2. getString()方法特点：不管数据库中的数据是什么类型，都是以String形式取出。
+> 3. 当然也可以按数据类型取出，但是数据类型一定要匹配。
+> 4. JDBC中所有下标从1开始，不是从0开始。
 
